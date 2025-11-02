@@ -1,8 +1,8 @@
 # OpenPose with Server And Worker
 
-## Caution this project is not perfect
-## This project can just output JSON files
-## Can't create BVH file 
+### Caution this project is not perfect
+### This project can just output JSON files
+### Can't create BVH file 
 
 ## How to use
 
