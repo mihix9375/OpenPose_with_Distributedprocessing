@@ -14,7 +14,7 @@
 - Type Full-Path of video in TextBox
 - Click Button "処理開始"
 
-### Worker
+### Client (Worker)
 - Download or clone this repository
 - Run "get_files.cmd"
 - Run "working/run_worker.bat"
