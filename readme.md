@@ -1,3 +1,3 @@
-# OpenPoseServer And Worker
+# OpenPose with Server And Worker
 
 ## 
