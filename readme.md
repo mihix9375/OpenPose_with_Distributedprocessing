@@ -17,6 +17,6 @@
 ### Client (Worker)
 - Download or clone this repository
 - Run "get_files.cmd"
-- Run "working/run_worker.bat"
+- Run "worker/run_worker.bat"
 - Type your ip address and port
 - Type Server ip address and port (Server port is 5000)
