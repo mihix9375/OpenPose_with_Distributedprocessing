@@ -43,8 +43,9 @@ namespace OpenPoseServer
                 byte[] imageData = frame.ToBytes(".jpg");
 
 
+                Console.WriteLine("[Main] 空きワーカー待ち...");
                 string? workerUrl = null;
-                while (!(workerUrl is null))
+                while (workerUrl is null)
                 {
                     if (!(availableWorkers.availableWorkersURL is null))
                     {
@@ -52,7 +53,6 @@ namespace OpenPoseServer
                         availableWorkers.ControlWorkers(workerUrl, "Remove");
                     }
 
-                    Console.WriteLine("[Main] 空きワーカー待ち...");
                     await Task.Delay(100);
                 }
 

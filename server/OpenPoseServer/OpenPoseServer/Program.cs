@@ -31,7 +31,7 @@ var app = builder.Build();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
-
+  
 app.MapPost("/api/register", (WorkerRegistrationRequest request) =>
 {
     if (request == null || string.IsNullOrEmpty(request.Url))

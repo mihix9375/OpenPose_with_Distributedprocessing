@@ -307,7 +307,7 @@ int ProcessAndResponse(const op::Wrapper& opWrapper, const std::string CurrentIP
             }
             int mode = std::stoi(req.get_param_value("mode"));
 
-            if (mode == 0) // MultiCam (Triangulation)
+            if (mode == 0) // MultiCam
             {
                 if (!req.has_file("image_left") || !req.has_file("image_right")) {
                     res.status = 400;
@@ -325,7 +325,7 @@ int ProcessAndResponse(const op::Wrapper& opWrapper, const std::string CurrentIP
 
                 res.set_content(json_result, "application/json");
             }
-            else if (mode == 1) // SingleCam (3D from 1 image)
+            else if (mode == 1) // SingleCam
             {
                 if (!req.has_file("image")) {
                     res.status = 400;
