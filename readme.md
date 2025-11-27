@@ -6,12 +6,15 @@
 
 ## How to build
 ### Server (Master)
+- Open "server/OpenPoseServer/OpenPoseServer.sln"
+- Install NuGet package GRPC.Tools, GRPC.Net.Client, Google.Protobuf, OpenCvSharp4
+- Run build
 
 ### Client (Worker)
 - Download or clone https://github.com/mihix9375/OpenPose-1.7.0-Improved/tree/main
 - Marge OpenPose-1.7.0-Improved and OpenPose_with_Distributedprocessing
-- Run get_3rdparty.bat
-- Run workerbuild.bat
+- Run "get_3rdparty.bat"
+- Run "workerbuild.bat"
 
 
 ## How to use
