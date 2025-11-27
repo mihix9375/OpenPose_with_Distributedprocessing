@@ -1,0 +1,7 @@
+add_subdirectory(calibration)
+add_subdirectory(openpose)
+add_subdirectory(tutorial_add_module)
+add_subdirectory(user_code)
+if (UNIX OR APPLE)
+  add_subdirectory(tests)
+endif (UNIX OR APPLE)

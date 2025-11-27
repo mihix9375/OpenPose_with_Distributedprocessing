@@ -1,0 +1,2 @@
+obj\Debug\net8.0/Openpose.cs \
+obj\Debug\net8.0/OpenposeGrpc.cs: ../../../Protos/openpose.proto

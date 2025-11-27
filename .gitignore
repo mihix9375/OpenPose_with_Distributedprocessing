@@ -125,8 +125,8 @@ out
 Logs
 binary
 build
-server/OpenPoseServer/OpenPoseServer/png
-*/bin/*
+server/OpenPoseServer/OpenPoseServer/png*
+*bin*
 tree.txt
 run.bat
 Openpose_To_Bvh.py

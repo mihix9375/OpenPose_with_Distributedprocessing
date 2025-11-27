@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "dgSpecHash": "/cq1/XG0ALE=",
+  "success": true,
+  "projectFilePath": "E:\\research\\openpose-1.7.0\\server\\OpenPoseServer\\OpenPoseServer\\OpenPoseServer.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\mihix\\.nuget\\packages\\google.protobuf\\3.33.1\\google.protobuf.3.33.1.nupkg.sha512",
+    "C:\\Users\\mihix\\.nuget\\packages\\grpc.core.api\\2.71.0\\grpc.core.api.2.71.0.nupkg.sha512",
+    "C:\\Users\\mihix\\.nuget\\packages\\grpc.net.client\\2.71.0\\grpc.net.client.2.71.0.nupkg.sha512",
+    "C:\\Users\\mihix\\.nuget\\packages\\grpc.net.common\\2.71.0\\grpc.net.common.2.71.0.nupkg.sha512",
+    "C:\\Users\\mihix\\.nuget\\packages\\grpc.tools\\2.76.0\\grpc.tools.2.76.0.nupkg.sha512",
+    "C:\\Users\\mihix\\.nuget\\packages\\microsoft.dotnet.ilcompiler\\8.0.21\\microsoft.dotnet.ilcompiler.8.0.21.nupkg.sha512",
+    "C:\\Users\\mihix\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\6.0.0\\microsoft.extensions.logging.abstractions.6.0.0.nupkg.sha512",
+    "C:\\Users\\mihix\\.nuget\\packages\\microsoft.net.illink.tasks\\8.0.21\\microsoft.net.illink.tasks.8.0.21.nupkg.sha512",
+    "C:\\Users\\mihix\\.nuget\\packages\\microsoft.visualstudio.azure.containers.tools.targets\\1.22.1\\microsoft.visualstudio.azure.containers.tools.targets.1.22.1.nupkg.sha512",
+    "C:\\Users\\mihix\\.nuget\\packages\\opencvsharp4\\4.11.0.20250507\\opencvsharp4.4.11.0.20250507.nupkg.sha512",
+    "C:\\Users\\mihix\\.nuget\\packages\\system.memory\\4.6.3\\system.memory.4.6.3.nupkg.sha512",
+    "C:\\Users\\mihix\\.nuget\\packages\\runtime.win-x64.microsoft.dotnet.ilcompiler\\8.0.21\\runtime.win-x64.microsoft.dotnet.ilcompiler.8.0.21.nupkg.sha512"
+  ],
+  "logs": []
+}

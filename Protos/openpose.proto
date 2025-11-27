@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+// パッケージ名 (C#では名前空間、C++では namespace になる)
+package OpenPoseStream;
+
+// サービス名（これが「API」本体）
+service OpenPoseStreamer {
+    // リアルタイム処理用の「双方向ストリーミング」
+    // (C#がFrameRequestを送り続け、C++がFrameResultを返し続ける)
+    rpc ProcessStream(stream FrameRequest) returns (stream FrameResult);
+}
+
+// C# (マスター) が C++ (ワーカー) に送るデータ
+message FrameRequest {
+    int32 frame_id = 1;        // 順序保証のためのフレーム番号
+    int32 mode = 2;            // 0=2カメ, 1=1カメ
+
+    // 1カメ・2カメ共通
+    bytes image_right = 3;     // 右カメラ (またはメイン) の画像データ (生バイナリ)
+    string serial_right = 4;   // 右カメラのシリアル
+
+    // 2カメの時だけ使う
+    bytes image_left = 5;      // 左カメラの画像データ (生バイナリ)
+    string serial_left = 6;    // 左カメラのシリアル
+}
+
+// C++ (ワーカー) が C# (マスター) に返すデータ
+message FrameResult {
+    int32 frame_id = 1;        // C#が送ってきたフレーム番号と同じ番号
+    string json_data = 2;      // 3DキーポイントのJSON文字列
+    bool success = 3;          // 処理が成功したか
+    string error_message = 4;  // 失敗した場合のメッセージ
+}
