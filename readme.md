@@ -2,7 +2,8 @@
 
 - Caution this project is not perfect
 - This project can just output JSON files
-- Can't create BVH file 
+- Can't create BVH file
+- Please wait a moment until completion.
 
 ## How to build
 ### Server (Master)
