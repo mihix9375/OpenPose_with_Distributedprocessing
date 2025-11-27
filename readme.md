@@ -4,6 +4,16 @@
 - This project can just output JSON files
 - Can't create BVH file 
 
+## How to build
+### Server (Master)
+
+### Client (Worker)
+- Download or clone https://github.com/mihix9375/OpenPose-1.7.0-Improved/tree/main
+- Marge OpenPose-1.7.0-Improved and OpenPose_with_Distributedprocessing
+- Run get_3rdparty.bat
+- Run workerbuild.bat
+
+
 ## How to use
 
 ### Server (Master)
