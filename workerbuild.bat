@@ -19,11 +19,11 @@ set CMAKE_VERSION=3.31.5
 :: set WINWDOWS_SDK_VERSION=
 :: =========================
 
-set /p isInstalllCUDA=Did You install CUDA? (If "n", CUDA 11.8 is used)[y/n]:
+:: set /p isInstalllCUDA=Did You install CUDA? (If "n", CUDA 11.8 is used)[y/n]:
 
-if not "%isInstalllCUDA%" == "n" (
-	goto :cuda_skip
-)
+:: if not "%isInstalllCUDA%" == "n" (
+:: 	 goto :cuda_skip
+:: )
 :: ======== CUDA ========
 :: set CUDA_PATH=%~dp03rdparty/CUDA-%CUDA_VERSION%
 :: set CUDA_PATH_BIN=%CUDA_PATH%/bin
