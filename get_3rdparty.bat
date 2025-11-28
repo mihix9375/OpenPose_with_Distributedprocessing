@@ -26,6 +26,7 @@ rmdir /s /q 3rdparty\boost_1.80.0
 rmdir /s /q 3rdparty\cmake-3.31.5
 rmdir /s /q 3rdparty\opencv-4.9.0
 rmdir /s /q 3rdparty\vcpkg
+rmdir /s /q 3rdparty\eigen-3.4.0
 
 cd temp
 
@@ -124,10 +125,16 @@ echo Done
 echo:
 
 echo EIGEN
-%zpath% x eigen-3.4.0.zip -mmt > %logDir%\eigen.log
+%zpath% x eigen-3.4.0.zip -mmt >> %logDir%\eigen.log
 cd eigen-3.4.0
 mkdir build
-call ..\cmake-3.31.5-windows-x86_64\bin\cmake.exe -S . -B build -G "Visual Studio 16 2019"  >> %logDir%\eigen.log
+call ..\..\3rdparty\cmake-3.31.5\bin\cmake.exe -S . -B build -G "Visual Studio 16 2019"  >> %logDir%\eigen.log
+cd build
+call ..\..\..\3rdparty\cmake-3.31.5\bin\cmake.exe --build . >> %logDir%\eigen.log
+cd ..
+cd ..
+echo Done
+echo:
 
 echo OpenCV
 %zpath% x 4.9.0.zip -mmt > %logDir%\opencv.log
@@ -149,6 +156,7 @@ echo Finishing ...
 
 move cmake-3.31.5-windows-x86_64 ..\3rdparty\cmake-3.31.5
 move boost_1_80_0 ..\3rdparty\boost_1.80.0
+move eigen-3.4.0 ..\3rdparty\eigen-3.4.0
 move opencv-4.9.0 ..\3rdparty\opencv-4.9.0
 
 cd ..

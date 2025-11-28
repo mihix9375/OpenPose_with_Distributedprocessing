@@ -8,7 +8,7 @@ set MAIN_DIR=%~dp0
 :: ======== VERSION ========
 :: You can rewrite this
 set CUDA_VERSION=11.8
-set EIGEN_VERSION=3.3.9
+set EIGEN_VERSION=3.4.0
 :: set VS_YEARS=2019
 :: set VS_VERSION=16
 set BOOST_VERSION=1.80.0

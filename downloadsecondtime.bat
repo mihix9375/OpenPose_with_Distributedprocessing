@@ -1,4 +1,4 @@
-@echo off
+::@echo off
 setlocal enabledelayedexpansion
 chcp 65001
 
@@ -14,6 +14,7 @@ for /f "tokens=1-4 delims=:.," %%a in ("%time%") do (
 
 :input
 cls
+dir
 echo Which files do you want to install?
 echo 1.BOOST          
 echo 2.CUDA           
@@ -23,11 +24,12 @@ echo 5.VisualStudio
 echo 6.VCPKG          
 echo 7.OpenCV         
 echo 8.GRPC   
-echo 9.quit        
+echo 9.eigen
+echo 10.quit        
 echo:
 set /p installfile=:
 
-if "%installfile%"=="9" goto :finish
+if "%installfile%"=="10" goto :finish
 if "%installfile%"=="1" goto :1
 if "%installfile%"=="2" goto :2
 if "%installfile%"=="3" goto :3
@@ -36,6 +38,7 @@ if "%installfile%"=="5" goto :5
 if "%installfile%"=="6" goto :6
 if "%installfile%"=="7" goto :7
 if "%installfile%"=="8" goto :8
+if "%installfile%"=="9" goto :9
 
 echo bad input
 goto :input
@@ -142,9 +145,31 @@ goto :input
 
 :8
 echo Installing ...
-call .\3rdparty\vcpkg\vcpkg.exe vcpkg install grpc:x64-windows > %logDir%\grpc.log
+call .\3rdparty\vcpkg\vcpkg.exe install grpc:x64-windows > %logDir%\grpc.log
 echo Done
 goto :input
+
+:9
+echo Removing ...
+rmdir /s /q 3rdparty\eigen-3.4.0
+echo Downloading ...
+cd temp
+wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip > %logDir%\eigen.log
+echo Installing ...
+%zpath% x eigen-3.4.0.zip -mmt >> %logDir%\eigen.log
+cd eigen-3.4.0
+mkdir build
+call ..\..\3rdparty\cmake-3.31.5\bin\cmake.exe -S . -B build -G "Visual Studio 16 2019"  >> %logDir%\eigen.log
+cd build
+call ..\..\..\3rdparty\cmake-3.31.5\bin\cmake.exe --build . >> %logDir%\eigen.log
+cd ..
+cd ..
+move eigen-3.4.0 ..\3rdparty\eigen-3.4.0
+cd ..
+echo Done
+pause
+goto :input
+
 
 :finish
 rmdir /s /q temp
