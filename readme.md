@@ -5,6 +5,12 @@
 - Can't create BVH file
 - Please wait a moment until completion.
 
+## Required
+- Windows 10/11
+- NVIDIA GPU
+- 64GB RAM
+- Clock 4GHz Core 8 Thread 16 CPU
+
 ## How to build
 ### Server (Master)
 - Open "server/OpenPoseServer/OpenPoseServer.sln"
