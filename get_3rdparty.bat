@@ -61,6 +61,11 @@ wget https://github.com/microsoft/vcpkg/archive/refs/tags/2025.10.17.zip
 echo Done
 echo:
 
+echo EIGEN 3.4.0
+wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip
+echo Done
+echo:
+
 echo OpenCV 4.9.0
 wget https://github.com/opencv/opencv/archive/4.9.0.zip
 echo Done
@@ -117,6 +122,12 @@ echo GRPC
 call ..\3rdparty\vcpkg\vcpkg.exe install grpc:x64-windows > %logDir%\grpc.log
 echo Done
 echo:
+
+echo EIGEN
+%zpath% x eigen-3.4.0.zip -mmt > %logDir%\eigen.log
+cd eigen-3.4.0
+mkdir build
+call ..\cmake-3.31.5-windows-x86_64\bin\cmake.exe -S . -B build -G "Visual Studio 16 2019"  >> %logDir%\eigen.log
 
 echo OpenCV
 %zpath% x 4.9.0.zip -mmt > %logDir%\opencv.log
