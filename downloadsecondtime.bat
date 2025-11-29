@@ -14,7 +14,7 @@ for /f "tokens=1-4 delims=:.," %%a in ("%time%") do (
 
 :input
 cls
-dir
+::dir
 echo Which files do you want to install?
 echo 1.BOOST          
 echo 2.CUDA           

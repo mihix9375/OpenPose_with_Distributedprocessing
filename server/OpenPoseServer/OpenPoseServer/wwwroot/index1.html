@@ -1,0 +1,54 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>OpenPose マスターサーバー</title>
+    <meta charset="utf-8" />
+
+    <style>
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>OpenPose 分散処理</h1>
+    <p>処理モードを入力して下さい</p>
+    <select id="mode">
+        <option value="0">2カメ</option>
+        <option value="1">1カメ</option>
+    </select><p>
+    <p>処理する動画のフルパスを入力してください</p>
+    <input type="text" id="rightvideoPathInput" size="80" value="RIGHT PATH" />
+
+    <input type="text" id="leftvideoPathInput" class="hidden" size="80" value="LEFT PATH" /><br>
+
+    <p>使うカメラのシリアルナンバーを入力してください（キャリブレーション時に使用したもの）</p>
+    <input type="text" id="serialNumberRight" size="80" value="RIGHT SERIAL NUMBER" />
+
+    <input type="text" id="serialNumberLeft" class="hidden" size="80" value="RIGHT SERIAL NUMBER" />
+
+    <button id="startButton">処理開始</button>
+
+    <hr>
+    <p>サーバーのコンソールでログを確認してください。</p>
+
+    <script>
+        const select = document.getElementById("mode");
+        const pathL = document.getElementById("leftvideoPathInput");
+        const serialL = document.getElementById("serialNumberLeft");
+
+        const cam2Inputs = [pathL, serialL];
+
+        select.addEventListener("change", (event) => {
+            const isMode1 = event.target.value === "1";
+
+            cam2Inputs.forEach(input => {
+                input.classList.toggle("hidden", isMode1);
+            });
+        });
+
+        select.dispatchEvent(new Event("change"));
+    </script>
+    <script src="js/site.js"></script>
+</body>
+</html>

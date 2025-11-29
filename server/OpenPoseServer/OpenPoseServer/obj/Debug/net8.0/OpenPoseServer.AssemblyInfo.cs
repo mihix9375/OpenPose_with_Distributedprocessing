@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("OpenPoseServer")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+807880d3d553bb355140ad5f3517e94227a90339")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a2adcd732f78fa2e23f5705788926d0eb63fec8a")]
 [assembly: System.Reflection.AssemblyProductAttribute("OpenPoseServer")]
 [assembly: System.Reflection.AssemblyTitleAttribute("OpenPoseServer")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

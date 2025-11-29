@@ -13,13 +13,25 @@
 #include "./header/httplib.h"
 #include "./header/json.hpp"
 #include "./header/tinyxml2.h"
+#include "openpose.grpc.pb.h"
+#include <grpcpp/grpcpp.h>
 #define OPENPOSE_FLAGS_DISABLE_POSE
 #include <openpose/flags.hpp>
 #include <openpose/headers.hpp>
 #include <openpose/core/array.hpp>
 #include <openpose/core/matrix.hpp>
+
 using json = nlohmann::json;
 using namespace tinyxml2;
+using grpc::Server;
+using grpc::ServerReaderWriter;
+using grpc::ServerBuilder;
+using grpc::ServerContext;
+using grpc::Status;
+using OpenPoseStream::OpenPoseStreamer;
+using OpenPoseStream::FrameRequest;
+using OpenPoseStream::FrameResult;
+
 /** 
  * @brief OpenPoseで画像データを処理する
  * @param opWrapper OpenPoseのラッパーインスタンス
@@ -243,7 +255,7 @@ op::Array<float> process_image(op::Wrapper& opWrapper, const cv::Mat decoded_ima
     return op::Array<float>{};
 }
 
-json process_with_triangulation(op::Wrapper& opWrapper, const std::string& img_right, const std::string& img_left, const std::string& serial_right, const std::string& serial_left)
+void process_with_triangulation(op::Wrapper& opWrapper, const std::string& img_right, const std::string& img_left, const std::string& serial_right, const std::string& serial_left, bool& success, json& json_data)
 {
     std::vector<char> dataRight(img_right.begin(), img_right.end());
     std::vector<char> dataLeft(img_left.begin(), img_left.end());
@@ -253,7 +265,7 @@ json process_with_triangulation(op::Wrapper& opWrapper, const std::string& img_r
     if (image_right_decoded.empty() || image_left_decoded.empty())
     {
         std::cout << "process_with_triangulation() : 画像のデコードに失敗" << '\n';
-        return {};
+        json_data = {};
     }
 
     op::Array<float> keypoints_left = process_image(opWrapper, image_left_decoded);
@@ -264,7 +276,7 @@ json process_with_triangulation(op::Wrapper& opWrapper, const std::string& img_r
 
     if (points1_matched.empty())
     {
-        return nlohmann::json{ {"version", 1.3}, {"people", nlohmann::json::array()} };
+        json_data = nlohmann::json{ {"version", 1.3}, {"people", nlohmann::json::array()} };
     }
 
     std::vector<std::vector<double>> calibrationDataRight = read_calibration_data(serial_right);
@@ -289,76 +301,67 @@ json process_with_triangulation(op::Wrapper& opWrapper, const std::string& img_r
     // ... (points4D を points3D (N x 3) に変換するロジック) ...
 
     // 7. 3DキーポイントをJSONに変換
-    return convert_3d_mat_to_json(points3D);
+    json_data = convert_3d_mat_to_json(points3D);
+    success = true;
 }
 
-int ProcessAndResponse(const op::Wrapper& opWrapper, const std::string CurrentIP, const int CurrentPort)
+class OpenPoseStreamServer final : public OpenPoseStreamer::Service
 {
-    httplib::Server server;
+    private:
+        op::Wrapper* opWrapper_;
 
-    server.Post("/api/process", [&opWrapper](const httplib::Request& req, httplib::Response& res) 
-    {
-        try
-        {
-            if (!req.has_param("mode")) {
-                res.status = 400;
-                res.set_content("mode parameter is missing", "text/plain");
-                return 1;
-            }
-            int mode = std::stoi(req.get_param_value("mode"));
+    public:
+        OpenPoseStreamServer(op::Wrapper* wrapper) : opWrapper_(wrapper) {}
 
-            if (mode == 0) // MultiCam
-            {
-                if (!req.has_file("image_left") || !req.has_file("image_right")) {
-                    res.status = 400;
-                    res.set_content("image_left or image_right file is missing", "text/plain");
-                    return 1;
-                }
-                const auto img_left = req.get_file_value("image_left");
-                const auto img_right = req.get_file_value("image_right");
-                const auto serial_right = req.get_param_value("serial_right");
-                const auto serial_left = req.get_param_value("serial_left");
+        Status ProcessStream(ServerContext* context,
+                            ServerReaderWriter<FrameResult, FrameRequest>* stream)
+                            override
+                            {
+                                FrameRequest req;
 
-                std::cout << "[Worker] 2カメ処理リクエスト受信 (L: " << img_left.content.length() << " bytes, R: " << img_right.content.length() << " bytes)" << '\n';
+                                while (stream->Read(&req))
+                                {
+                                    FrameResult result;
+                                    if (req.mode() == 0) // 2 camera
+                                    {
+                                        bool success = false;
+                                        json json_data;
+                                        process_with_triangulation(*opWrapper_,
+                                                                req.image_right(),
+                                                                req.image_left(),
+                                                                req.serial_right(),
+                                                                req.serial_left(),
+                                                                success,
+                                                                json_data);
+                                        result.set_success(success);
+                                        result.set_json_data(json_data.dump()); 
+                                        result.set_frame_id(req.frame_id());
+                                        result.set_error_message("");;
 
-                std::string json_result = process_with_triangulation(opWrapper, img_left.content, img_right.content, serial_right, serial_left);
+                                        stream->Write(result);
+                                    }
+                                }
+                                return Status::OK;
+                            }
+};
 
-                res.set_content(json_result, "application/json");
-            }
-            else if (mode == 1) // SingleCam
-            {
-                if (!req.has_file("image")) {
-                    res.status = 400;
-                    res.set_content("image file is missing", "text/plain");
-                    return 1;
-                }
-                const auto& img = req.get_file_value("image");
+int ProcessAndResponse(op::Wrapper& opWrapper, const std::string CurrentIP, const int CurrentPort)
+{
+    std::string server_addr("0.0.0.0:" + std::to_string(CurrentPort));
+    OpenPoseStreamServer service(&opWrapper);
 
-                std::cout << "[Worker] 1カメ処理リクエスト受信 (サイズ: " << img.content.length() << " bytes)" << '\n';
-            
-                std::string json_result = process_with_openpose(opWrapper, img.content); 
-            
-                res.set_content(json_result, "application/json");
-            }
-        }
-        catch (const std::exception& e)
-        {
-            res.status = 500;
-            res.set_content(std::string("Internal server error: ") + e.what(), "text/plain");
-        }
-    });
+    ServerBuilder builder;
 
-    std::cout << "[Worker] サーバーを起動 (https://" << CurrentIP << ":" << CurrentPort << ")" << '\n';
+    builder.SetMaxReceiveMessageSize(100 * 1024 * 1024); 
+    builder.SetMaxSendMessageSize(100 * 1024 * 1024);
 
-    std::cout << "[Worker] マスターからの処理リクエスト待機中" << '\n';
+    builder.AddListeningPort(server_addr, grpc::InsecureServerCredentials());
+    builder.RegisterService(&service);
 
-    if (!server.listen("0.0.0.0", CurrentPort))
-    {
-        std::cerr << "[Worker] サーバーの起動に失敗" << '\n';
+    std::unique_ptr<Server> server(builder.BuildAndStart());
+    std::cout << "Server listening on " << server_addr << '\n';
 
-        WSACleanup();
-        return 0;
-    }
+    server->Wait();
 }
 
 int main(int argc, char* argv[])
