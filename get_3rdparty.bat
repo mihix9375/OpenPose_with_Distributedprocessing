@@ -98,15 +98,19 @@ echo:
 
 echo CMAKE
 %zpath% x cmake-3.31.5-windows-x86_64.zip -mmt > %logDir%\cmake.log
+move cmake-3.31.5-windows-x86_64 ..\3rdparty\cmake-3.31.5
 echo Done
 echo:
 
 echo BOOST
 %zpath% x boost_1_80_0.7z -mmt > %logDir%\boost.log
-cd boost_1_80_0
+move boost_1_80_0 ..\3rdparty\boost_1.80.0
+cd ..\3rdparty\boost_1_80_0
 call .\bootstrap.bat >> %logDir%\boost.log
 call b2.exe address-model=64 >> %logDir%\boost.log
 cd ..
+cd ..
+cd temp
 echo Done
 echo:
 
@@ -126,19 +130,23 @@ echo:
 
 echo EIGEN
 %zpath% x eigen-3.4.0.zip -mmt >> %logDir%\eigen.log
+move eigen-3.4.0 ..\3rdparty\eigen-3.4.0
 echo Done
 echo:
 
 echo OpenCV
 %zpath% x 4.9.0.zip -mmt > %logDir%\opencv.log
-cd opencv-4.9.0
+move opencv-4.9.0 ..\3rdparty\opencv-4.9.0
+cd ..\3rdparty\opencv-4.9.0
 mkdir build
-call ..\cmake-3.31.5-windows-x86_64\bin\cmake.exe -S . -B build -G "Visual Studio 16 2019" -DBUILD_opencv_world=ON >> %logDir%\opencv.log
+call ..\cmake-3.31.5\bin\cmake.exe -S . -B build -G "Visual Studio 16 2019" -DBUILD_opencv_world=ON >> %logDir%\opencv.log
 cd build
-call ..\..\cmake-3.31.5-windows-x86_64\bin\cmake.exe --build . --config Debug >> %logDir%\opencvd.log
-call ..\..\cmake-3.31.5-windows-x86_64\bin\cmake.exe --build . --config Release >> %logDir%\opencv.log
+call ..\..\cmake-3.31.5\bin\cmake.exe --build . --config Debug >> %logDir%\opencvd.log
+call ..\..\cmake-3.31.5\bin\cmake.exe --build . --config Release >> %logDir%\opencv.log
 cd ..
 cd ..
+cd ..
+cd temp
 echo Done
 echo:
 
@@ -146,11 +154,6 @@ echo Install Done
 echo:
 
 echo Finishing ...
-
-move cmake-3.31.5-windows-x86_64 ..\3rdparty\cmake-3.31.5
-move boost_1_80_0 ..\3rdparty\boost_1.80.0
-move eigen-3.4.0 ..\3rdparty\eigen-3.4.0
-move opencv-4.9.0 ..\3rdparty\opencv-4.9.0
 
 cd ..
 rmdir /s /q temp
