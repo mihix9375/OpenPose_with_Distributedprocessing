@@ -4,52 +4,64 @@
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# vcpkg などで CMAKE_TOOLCHAIN_FILE が指定されていれば、
-# find_package が gRPC と Protobuf を見つけます
-find_package(Protobuf CONFIG REQUIRED COMPONENTS gRPC)
+find_package(protobuf CONFIG REQUIRED COMPONENTS gRPC)
 find_package(gRPC CONFIG REQUIRED)
 
-# -----------------------------------------------------------------
-# ビルド対象ファイル と Proto定義
-# -----------------------------------------------------------------
+# gRPCプラグインとProtocのパスを取得
+if(TARGET gRPC::grpc_cpp_plugin)
+    get_target_property(gRPC_CPP_PLUGIN_EXECUTABLE gRPC::grpc_cpp_plugin IMPORTED_LOCATION_RELEASE)
+    if(NOT gRPC_CPP_PLUGIN_EXECUTABLE)
+        get_target_property(gRPC_CPP_PLUGIN_EXECUTABLE gRPC::grpc_cpp_plugin IMPORTED_LOCATION_DEBUG)
+    endif()
+endif()
 
-# ビルドする実行ファイルを指定 (元のリストを置き換え)
-set(EXAMPLE_FILES
-    WorkerHttp_v1_0_2.cpp
+if(TARGET protobuf::protoc)
+    get_target_property(Protobuf_PROTOC_EXECUTABLE protobuf::protoc IMPORTED_LOCATION_RELEASE)
+    if(NOT Protobuf_PROTOC_EXECUTABLE)
+        get_target_property(Protobuf_PROTOC_EXECUTABLE protobuf::protoc IMPORTED_LOCATION_DEBUG)
+    endif()
+endif()
+
+get_filename_component(PROTO_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../Protos" ABSOLUTE)
+set(PROTO_FILE "${PROTO_DIR}/openpose.proto")
+
+if(NOT EXISTS ${PROTO_FILE})
+    message(FATAL_ERROR "Error: .proto file not found at: ${PROTO_FILE}\nPlease check the PROTO_DIR path in CMakeLists.txt.")
+endif()
+
+# 生成されるファイル名の定義
+get_filename_component(PROTO_NAME ${PROTO_FILE} NAME_WE)
+set(PROTO_SRC "${CMAKE_CURRENT_BINARY_DIR}/${PROTO_NAME}.pb.cc")
+set(PROTO_HDR "${CMAKE_CURRENT_BINARY_DIR}/${PROTO_NAME}.pb.h")
+set(GRPC_SRC "${CMAKE_CURRENT_BINARY_DIR}/${PROTO_NAME}.grpc.pb.cc")
+set(GRPC_HDR "${CMAKE_CURRENT_BINARY_DIR}/${PROTO_NAME}.grpc.pb.h")
+
+# -----------------------------------------------------------------
+# .proto から C++ コードを生成
+# -----------------------------------------------------------------
+add_custom_command(
+    OUTPUT ${PROTO_SRC} ${PROTO_HDR} ${GRPC_SRC} ${GRPC_HDR}
+    COMMAND ${Protobuf_PROTOC_EXECUTABLE}
+    ARGS --grpc_out=${CMAKE_CURRENT_BINARY_DIR}
+         --cpp_out=${CMAKE_CURRENT_BINARY_DIR}
+         -I ${PROTO_DIR}                                        # ←重要: .protoのあるフォルダをインクルードパスに追加
+         --plugin=protoc-gen-grpc=${gRPC_CPP_PLUGIN_EXECUTABLE}
+         ${PROTO_FILE}
+    DEPENDS ${PROTO_FILE}
 )
 
-# .proto ファイルの場所を指定 (環境に合わせて要調整)
-set(PROTO_DIR ${CMAKE_SOURCE_DIR}/../../Protos)
-set(PROTO_FILE ${PROTO_DIR}/openpose.proto)
-
-# .proto から生成される .cpp/.h ファイルの出力先
-set(PROTO_GENERATED_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
-
-# -----------------------------------------------------------------
-# .proto から C++ コードを生成する設定
-# -----------------------------------------------------------------
-protobuf_generate_grpc(
-    TARGET WorkerHttp_v1_0_2_proto
-    LANGUAGE cpp
-    PROTOS ${PROTO_FILE}
-    IMPORT_DIRS ${PROTO_DIR}
-    GENERATE_MOCKS FALSE
-    # PROTO_SRCS という変数に、生成されたファイルパスが格納される
-    GENERATED_FILES_VAR PROTO_SRCS 
-)
-
-# OpenPose の標準ユーティリティをインクルード
+# OpenPose の標準ユーティリティ
 include(${CMAKE_SOURCE_DIR}/cmake/Utils.cmake)
 
 # -----------------------------------------------------------------
-# 実行ファイルのビルド設定 (ループ)
+# 実行ファイルのビルド設定
 # -----------------------------------------------------------------
-# (EXAMPLE_FILES には WorkerHttp_v1_0_2.cpp しか入っていない)
+set(EXAMPLE_FILES WorkerHttp_v1_0_2.cpp)
+
 foreach(EXAMPLE_FILE ${EXAMPLE_FILES})
 
   get_filename_component(SOURCE_NAME ${EXAMPLE_FILE} NAME_WE)
 
-  # 実行ファイル名 (Win: .exe, Linux: .bin)
   if (UNIX OR APPLE)
     set(EXE_NAME "${SOURCE_NAME}.bin")
   elseif (WIN32)
@@ -58,41 +70,33 @@ foreach(EXAMPLE_FILE ${EXAMPLE_FILES})
 
   message(STATUS "Adding Example ${EXE_NAME}")
   
-  # 実行ファイル(ターゲット)を追加
   add_executable(${EXE_NAME} 
-      ${EXAMPLE_FILE}  # WorkerHttp_v1_0_2.cpp
-      ${PROTO_SRCS}    # openpose.pb.cc と openpose.grpc.pb.cc
+      ${EXAMPLE_FILE}
+      ${PROTO_SRC}
+      ${GRPC_SRC}
+      ${PROTO_HDR}
+      ${GRPC_HDR}
   )
 
-  # C++17 をターゲットに設定
   target_compile_features(${EXE_NAME} PRIVATE cxx_std_17)
 
-  # 必要なライブラリをすべてリンク
   target_link_libraries(${EXE_NAME} 
-      # OpenPose 本体
       openpose 
-      ${examples_3rdparty_libraries} # OpenCV, Caffe など
-      
-      # gRPC と Protobuf のライブラリ
+      ${examples_3rdparty_libraries}
       gRPC::grpc++
       gRPC::grpc++_reflection
-      Protobuf::libprotobuf
-
-      # Winsock (C++コード内で #pragma しているが、CMakeでも明示)
+      protobuf::libprotobuf
       ws2_32
   )
   
-  # .proto から生成された .h ファイルを見つけるためのインクルードパス
-  target_include_directories(${EXE_NAME} PRIVATE 
-      ${PROTO_GENERATED_DIR}
+  target_include_directories(${EXE_NAME} PUBLIC 
+      ${CMAKE_CURRENT_BINARY_DIR}
   )
 
-  # Visual Studio の .vcxproj.user などを設定 (元のまま)
   if (WIN32)
     set_property(TARGET ${EXE_NAME} PROPERTY FOLDER "Examples/Tutorial/C++ API")
     configure_file(${CMAKE_SOURCE_DIR}/cmake/OpenPose${VCXPROJ_FILE_GPU_MODE}.vcxproj.user
         ${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME}.vcxproj.user @ONLY)
-    # Properties->General->Output Directory
     set_property(TARGET ${EXE_NAME} PROPERTY RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR}/$(Platform)/$(Configuration))
     set_property(TARGET ${EXE_NAME} PROPERTY RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR}/$(Platform)/$(Configuration))
   endif (WIN32)

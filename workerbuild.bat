@@ -82,9 +82,9 @@ set Protobuf_DIR=%~dp03rdparty/vcpkg/installed/x64-windows/share/protobuf
 :: ======================
 
 :: ======== EIGEN ========
-set EIGEN_PATH=%~dp03rdparty/eigen-%EIGEN_VERSION%/build
-set Eigen_ROOT=%~dp03rdparty/eigen-%EIGEN_VERSION%/build
-set EIGEN_INCLUDE_DIR=%~dp03rdparty/eigen-%EIGEN_VERSION%/build
+set EIGEN_PATH=%~dp03rdparty/eigen-%EIGEN_VERSION%
+set Eigen_ROOT=%~dp03rdparty/eigen-%EIGEN_VERSION%
+set EIGEN_INCLUDE_DIR=%~dp03rdparty/eigen-%EIGEN_VERSION%
 :: =======================
 
 :: ======== CMAKE ========

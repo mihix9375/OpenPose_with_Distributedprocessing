@@ -1,54 +1,381 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-    <title>OpenPose マスターサーバー</title>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Console App Controller</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
-        .hidden {
-            display: none;
+        :root {
+            --bg-color: #0f172a; /* 全体の背景（深い紺色） */
+            --card-bg: #1e293b; /* カードの背景 */
+            --text-main: #f1f5f9; /* メインテキスト */
+            --text-sub: #94a3b8; /* サブテキスト */
+            --accent: #3b82f6; /* アクセントカラー（青） */
+            --success: #10b981; /* 成功（緑） */
+            --danger: #ef4444; /* 危険・停止（赤） */
+            --terminal-bg: #000000; /* ログエリア背景 */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* スクロールは内部で行う */
+        }
+
+        /* --- ヘッダーエリア --- */
+        header {
+            padding: 15px 30px;
+            background: var(--card-bg);
+            border-bottom: 1px solid #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .app-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-badge {
+            font-size: 0.85rem;
+            padding: 5px 12px;
+            border-radius: 20px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid var(--success);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* --- メインレイアウト (左右分割) --- */
+        .container {
+            display: grid;
+            grid-template-columns: 350px 1fr; /* 左:設定パネル 350px, 右:ログ 残り全部 */
+            height: calc(100vh - 70px);
+        }
+
+        /* --- 左サイド：コントロールパネル --- */
+        .control-panel {
+            padding: 20px;
+            background: var(--card-bg);
+            border-right: 1px solid #334155;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .panel-section h3 {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 5px;
+        }
+
+        /* ボタン群 */
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-start {
+            background: var(--accent);
+            color: white;
+            grid-column: span 2; /* スタートボタンは横幅いっぱい */
+        }
+
+            .btn-start:hover {
+                background: #2563eb;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            }
+
+        .btn-stop {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+            .btn-stop:hover {
+                background: var(--danger);
+                color: white;
+            }
+
+        .btn-restart {
+            background: #334155;
+            color: var(--text-main);
+        }
+
+            .btn-restart:hover {
+                background: #475569;
+            }
+
+        /* 入力フォーム */
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+            .input-group label {
+                display: block;
+                font-size: 0.85rem;
+                color: var(--text-sub);
+                margin-bottom: 5px;
+            }
+
+            .input-group input, .input-group select {
+                width: 100%;
+                padding: 10px;
+                background: #0f172a;
+                border: 1px solid #334155;
+                border-radius: 6px;
+                color: var(--text-main);
+                font-family: 'JetBrains Mono', monospace;
+                font-size: 0.9rem;
+            }
+
+                .input-group input:focus {
+                    outline: none;
+                    border-color: var(--accent);
+                }
+
+        /* --- 右サイド：ログエリア --- */
+        .log-panel {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #0b1120;
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-sub);
+            font-size: 0.9rem;
+        }
+
+        .terminal-window {
+            flex-grow: 1;
+            background: var(--terminal-bg);
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            overflow-y: auto;
+            color: #d1d5db;
+            max-height: 800px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            display: block;
+        }
+
+            /* スクロールバーのカスタマイズ */
+            .terminal-window::-webkit-scrollbar {
+                width: 10px;
+            }
+
+            .terminal-window::-webkit-scrollbar-track {
+                background: #1a1a1a;
+            }
+
+            .terminal-window::-webkit-scrollbar-thumb {
+                background: #334155;
+                border-radius: 5px;
+            }
+
+        .log-entry {
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+
+        .log-time {
+            color: #64748b;
+            margin-right: 10px;
+            user-select: none;
+        }
+
+        .log-info {
+            color: #3b82f6;
+        }
+
+        .log-warn {
+            color: #f59e0b;
+        }
+
+        .log-error {
+            color: #ef4444;
+        }
+
+        .log-success {
+            color: #10b981;
         }
     </style>
 </head>
 <body>
-    <h1>OpenPose 分散処理</h1>
-    <p>処理モードを入力して下さい</p>
-    <select id="mode">
-        <option value="0">2カメ</option>
-        <option value="1">1カメ</option>
-    </select><p>
-    <p>処理する動画のフルパスを入力してください</p>
-    <input type="text" id="rightvideoPathInput" size="80" value="RIGHT PATH" />
 
-    <input type="text" id="leftvideoPathInput" class="hidden" size="80" value="LEFT PATH" /><br>
+    <header>
+        <div class="app-title">
+            <i class="fa-solid fa-terminal"></i>
+            Backend Controller
+        </div>
+        <div class="status-badge">
+            <div class="status-dot"></div>
+            Running
+        </div>
+    </header>
 
-    <p>使うカメラのシリアルナンバーを入力してください（キャリブレーション時に使用したもの）</p>
-    <input type="text" id="serialNumberRight" size="80" value="RIGHT SERIAL NUMBER" />
+    <div class="container">
+        <aside class="control-panel">
+            <div class="panel-section">
+                <h3>Actions</h3>
+                <div class="btn-group">
+                    <Button class="btn-start"><i class="fa-solid fa-play"></i> Start Process</Button>
+                    <button class="btn-restart"><i class="fa-solid fa-rotate-right"></i> Restart</button>
+                    <button class="btn-stop"><i class="fa-solid fa-power-off"></i> Stop</button>
+                </div>
+            </div>
 
-    <input type="text" id="serialNumberLeft" class="hidden" size="80" value="RIGHT SERIAL NUMBER" />
+            <div class="panel-section">
+                <h3>Configuration</h3>
+                <div class="input-group">
+                    <label>Target IP Address</label>
+                    <input type="text" value="192.168.1.10">
+                </div>
+                <div class="input-group">
+                    <label>Port</label>
+                    <input type="number" value="8080">
+                </div>
+                <div class="input-group">
+                    <label>Mode</label>
+                    <select>
+                        <option>1 camera</option>
+                        <option>2 camera</option>
+                        <option>more camera</option>
+                    </select>
+                </div>
+            </div>
+        </aside>
 
-    <button id="startButton">処理開始</button>
-
-    <hr>
-    <p>サーバーのコンソールでログを確認してください。</p>
+        <main class="log-panel">
+            <div class="log-header">
+                <span><i class="fa-solid fa-code"></i> Live Output</span>
+                <button onclick="clearLog()" style="background:none; border:none; color:#64748b; font-size:0.8rem; padding:0;">Clear Log</button>
+            </div>
+            <div class="terminal-window" id="terminal">
+                <div class="log-entry"><span class="log-time">[10:00:01]</span> <span class="log-info">INFO:</span> System initialized.</div>
+                <div class="log-entry"><span class="log-time">[10:00:02]</span> <span class="log-info">INFO:</span> Connecting to server...</div>
+                <div class="log-entry"><span class="log-time">[10:00:03]</span> <span class="log-success">SUCCESS:</span> Connection established.</div>
+            </div>
+        </main>
+    </div>
 
     <script>
-        const select = document.getElementById("mode");
-        const pathL = document.getElementById("leftvideoPathInput");
-        const serialL = document.getElementById("serialNumberLeft");
+        const terminal = document.getElementById('terminal');
 
-        const cam2Inputs = [pathL, serialL];
+        function addLog(message, type = 'INFO') {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('ja-JP', { hour12: false });
 
-        select.addEventListener("change", (event) => {
-            const isMode1 = event.target.value === "1";
+            const div = document.createElement('div');
+            div.className = 'log-entry';
 
-            cam2Inputs.forEach(input => {
-                input.classList.toggle("hidden", isMode1);
-            });
-        });
+            let typeClass = 'log-info';
+            if (type === 'ERROR') typeClass = 'log-error';
+            if (type === 'WARN') typeClass = 'log-warn';
+            if (type === 'SUCCESS') typeClass = 'log-success';
 
-        select.dispatchEvent(new Event("change"));
-    </script>
-    <script src="js/site.js"></script>
+            div.innerHTML = `<span class="log-time">[${timeString}]</span> <span class="${typeClass}">${type}:</span> ${message}`;
+
+            terminal.appendChild(div);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function clearLog() {
+            terminal.innerHTML = '';
+            addLog('Log cleared.', 'INFO');
+        }
+
+        window.addLog = addLog;
+
+        /*
+        const messages = [
+            { text: "Processing request from client...", type: "INFO" },
+            { text: "Heartbeat signal received.", type: "INFO" },
+            { text: "High memory usage detected (85%)", type: "WARN" },
+            { text: "Data packet verified.", type: "SUCCESS" },
+        ];
+
+        setInterval(() => {
+            const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+            // 30%の確率でログを出力
+            if (Math.random() > 0.7) {
+                addLog(randomMsg.text, randomMsg.type);
+            }
+        }, 1000);
+
+        */
+        document.querySelector('.btn-start').addEventListener('click', () => addLog('Starting process...', 'SUCCESS'));
+        document.querySelector('.btn-stop').addEventListener('click', () => addLog('Stopping process...', 'ERROR'));
+        document.querySelector('.btn-restart').addEventListener('click', () => addLog('Restarting system...', 'WARN'));</script>
 </body>
 </html>

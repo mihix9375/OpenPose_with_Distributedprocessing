@@ -126,13 +126,6 @@ echo:
 
 echo EIGEN
 %zpath% x eigen-3.4.0.zip -mmt >> %logDir%\eigen.log
-cd eigen-3.4.0
-mkdir build
-call ..\..\3rdparty\cmake-3.31.5\bin\cmake.exe -S . -B build -G "Visual Studio 16 2019"  >> %logDir%\eigen.log
-cd build
-call ..\..\..\3rdparty\cmake-3.31.5\bin\cmake.exe --build . >> %logDir%\eigen.log
-cd ..
-cd ..
 echo Done
 echo:
 

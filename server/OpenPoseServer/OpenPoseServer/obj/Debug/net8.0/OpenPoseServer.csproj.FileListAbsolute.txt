@@ -35,3 +35,7 @@ E:\research\openpose-1.7.0\server\OpenPoseServer\OpenPoseServer\obj\Debug\net8.0
 E:\research\openpose-1.7.0\server\OpenPoseServer\OpenPoseServer\obj\Debug\net8.0\OpenPoseServer.pdb
 E:\research\openpose-1.7.0\server\OpenPoseServer\OpenPoseServer\obj\Debug\net8.0\OpenPoseServer.genruntimeconfig.cache
 E:\research\openpose-1.7.0\server\OpenPoseServer\OpenPoseServer\obj\Debug\net8.0\ref\OpenPoseServer.dll
+E:\research\openpose-1.7.0\server\OpenPoseServer\OpenPoseServer\obj\Debug\net8.0\OpenPoseServer.RazorAssemblyInfo.cache
+E:\research\openpose-1.7.0\server\OpenPoseServer\OpenPoseServer\obj\Debug\net8.0\OpenPoseServer.RazorAssemblyInfo.cs
+E:\research\openpose-1.7.0\server\OpenPoseServer\OpenPoseServer\bin\Debug\net8.0\Microsoft.Extensions.ObjectPool.dll
+E:\research\openpose-1.7.0\server\OpenPoseServer\OpenPoseServer\bin\Debug\net8.0\Microsoft.Extensions.Options.dll
