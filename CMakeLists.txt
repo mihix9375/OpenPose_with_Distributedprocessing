@@ -14,7 +14,7 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
 ### CMAKE HEADERS
 # Ubuntu 18 default.
-After 3.8, no need for find_CUDA
+# After 3.8, no need for find_CUDA
 # https://cmake.org/cmake/help/v3.10/module/FindCUDA.html
 # https://cmake.org/cmake/help/v3.10/command/project.html
 # https://devblogs.nvidia.com/building-cuda-applications-cmake/
@@ -36,16 +36,15 @@ else (${CMAKE_VERSION} VERSION_GREATER 3.9.0)
   project(OpenPose)
 endif (${CMAKE_VERSION} VERSION_GREATER 3.9.0)
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR) # required by cmake eigen finder to find locally installed versions (e.g., CUDA 9.2 support was added in eigen 3.3.5)
-# cmake_minimum_required(VERSION 2.8.7 
-FATAL_ERROR) # min. cmake version recommended by Caffe
+# cmake_minimum_required(VERSION 2.8.7 FATAL_ERROR) # min. cmake version recommended by Caffe
 
 
 
 message(STATUS "OpenCV_LIB_PATH = ${OpenCV_LIB_PATH}")
 
 find_package(OpenCV REQUIRED)
-include_directories(${OpenCV_INCLUDE_DIRS})
-link_directories(${OpenCV_LIB_DIR})
+include_directories($ENV{OpenCV_INCLUDE_DIRS})
+link_directories($ENV{OpenCV_LIB_DIR})
 
 include_directories(${CUDA_INCLUDE_DIRS})
 
@@ -91,8 +90,7 @@ if (WIN32)
   set(CMAKE_SUPPRESS_REGENERATION ON)
 
   string (REPLACE "/D_WINDOWS" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-  string 
-(REPLACE "/DWIN32" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+  string (REPLACE "/DWIN32" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
   # /GL option causes the code to crash -- fix this
   # sdl flags causes error -- error : unknown attribute \"guard\"
@@ -137,7 +135,7 @@ if (CMAKE_COMPILER_IS_GNUCXX)
 endif (CMAKE_COMPILER_IS_GNUCXX)
 
 # Select 
-the Enhanced Instruction Set
+# the Enhanced Instruction Set
 set(INSTRUCTION_SET NONE CACHE STRING "Enable Enhanced Instruction Set")
 set_property(CACHE INSTRUCTION_SET PROPERTY STRINGS NONE AVX2)
 if (${INSTRUCTION_SET} MATCHES "AVX2")
@@ -223,8 +221,7 @@ endif (APPLE)
 # Display proper options to user
 # if (CUDA_FOUND AND OpenCL_FOUND)
 #   set_property(CACHE GPU_MODE PROPERTY STRINGS CUDA OPENCL CPU_ONLY)
-# 
-elseif (CUDA_FOUND)
+# elseif (CUDA_FOUND)
 #   set_property(CACHE GPU_MODE PROPERTY STRINGS CUDA CPU_ONLY)
 # elseif (OpenCL_FOUND)
 #   set_property(CACHE GPU_MODE PROPERTY STRINGS OPENCL CPU_ONLY)
@@ -279,8 +276,7 @@ if (${GPU_MODE} MATCHES "CPU_ONLY")
 endif (${GPU_MODE} MATCHES "CPU_ONLY")
 
 if (${USE_MKL})
-  # OpenPose 
-flags
+  # OpenPose flags
   add_definitions(-DUSE_MKL)
   message(STATUS "Building with MKL support.")
 endif (${USE_MKL})
@@ -462,8 +458,7 @@ if (UNIX OR APPLE)
   endif (${GPU_MODE} MATCHES "CUDA")
   find_package(GFlags) # For Caffe and OpenPose
   find_package(Glog) # For Caffe
-  find_package(Protobuf REQUIRED) # For 
-Caffe
+  find_package(Protobuf REQUIRED) # For Caffe
 
   if (OpenCV_CONFIG_FILE)
     include (${OpenCV_CONFIG_FILE})
@@ -509,8 +504,7 @@ Either turn off the `WITH_FLIR_CAMERA` option or specify the path to
     # find_package(PkgConfig)
     # pkg_check_modules(EIGEN3 REQUIRED eigen3)
     # # Option b) Find it (including apt-get)
-    if 
-(CUDA_VERSION_STRING STRGREATER "9.0")
+    if (CUDA_VERSION_STRING STRGREATER "9.0")
       find_package(Eigen3 3.3.5 REQUIRED NO_MODULE)
     else (CUDA_VERSION_STRING STRGREATER "9.0")
       find_package(Eigen3 3 REQUIRED NO_MODULE)
@@ -522,13 +516,11 @@ Either turn off the `WITH_FLIR_CAMERA` option or specify the path to
     find_package(GLEW REQUIRED)
     # find_package(GLUT REQUIRED) # TODO: Duplicated of WITH_3D_RENDERER, clean somehow (like Eigen)
     # git clone --recursive https://github.com/libigl/libigl.git
-    # No installation, it's header 
-only
+    # No installation, it's header only
     # TODO: It's header only (as Eigen), do BUILD option too to download it
     find_package(LIBIGL REQUIRED)
     find_package(OpenMP REQUIRED)
-    # Only adam/renderer::Renderer::IdleSaveImage() uses it.
-Make dependency optional in hand_model
+    # Only adam/renderer::Renderer::IdleSaveImage() uses it.Make dependency optional in hand_model
     # FIND_LIBRARY(FREE_IMAGE_LIBRARY NAMES libfreeimage.so)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
@@ -547,8 +539,7 @@ Make dependency optional in hand_model
 
   if (${GPU_MODE} MATCHES "CUDA")
     # Set CUDA Flags
-    set(CUDA_NVCC_FLAGS 
-"${CUDA_NVCC_FLAGS} -std=c++14") # Thrust library requires C++14 for CUDA >= 11
+    set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++14") # Thrust library requires C++14 for CUDA >= 11
     set(CUDA_NVCC_FLAGS_DEBUG "${CUDA_NVCC_FLAGS_DEBUG} -D_DEBUG -g")
 
     if (NOT CUDA_FOUND)
@@ -560,8 +551,7 @@ Make dependency optional in hand_model
     if (USE_CUDNN AND NOT CUDNN_FOUND)
       message(STATUS "cuDNN not found.")
       execute_process(COMMAND cat install_cudnn.sh WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/scripts/ubuntu)
-      message(FATAL_ERROR "Install cuDNN using the above commands.
-or turn off cuDNN by setting USE_CUDNN to OFF.")
+      message(FATAL_ERROR "Install cuDNN using the above commands.or turn off cuDNN by setting USE_CUDNN to OFF.")
     endif (USE_CUDNN AND NOT CUDNN_FOUND)
   endif (${GPU_MODE} MATCHES "CUDA")
 
@@ -576,8 +566,7 @@ or turn off cuDNN by setting USE_CUDNN to OFF.")
   endif (NOT GFLAGS_FOUND)
 
   if (NOT OpenCV_FOUND)
-    message(FATAL_ERROR "OpenCV not 
-found. Install OpenCV from the command line using the command(s) --\
+    message(FATAL_ERROR "OpenCV not found. Install OpenCV from the command line using the command(s) --\
       sudo apt-get install libopencv-dev")
   endif (NOT OpenCV_FOUND)
 
@@ -621,14 +610,13 @@ if (${GPU_MODE} MATCHES "OPENCL")
   # find_library(OpenCV_LIBS_RELEASE opencv_world420 HINTS ${FIND_LIB_PREFIX}/opencv/x64/vc${OPENCV_VS_VERSION}/lib)
   # find_library(OpenCV_LIBS_RELEASE opencv_world490 PATHS ${OpenCV_LIBS_RELEASE_DIR})
   # find_library(OpenCV_LIBS_DEBUG opencv_world420d HINTS ${FIND_LIB_PREFIX}/opencv/x64/vc${OPENCV_VS_VERSION}/lib)
-  # find_library(OpenCV_LIBS_DEBUG opencv_world490d PATHS 
-${OpenCV_LIBS_DEBUG_DIR})
+  # find_library(OpenCV_LIBS_DEBUG opencv_world490d PATHS ${OpenCV_LIBS_DEBUG_DIR})
   find_library(OpenCV_LIBS_RELEASE opencv_world490
-    PATHS ${OpenCV_LIBS_RELEASE_DIR}
+    PATHS $ENV{OpenCV_LIBS_RELEASE_DIR}
     NO_DEFAULT_PATH)
   
   find_library(OpenCV_LIBS_DEBUG opencv_world490d
-    PATHS ${OpenCV_LIBS_DEBUG_DIR}
+    PATHS $ENV{OpenCV_LIBS_DEBUG_DIR}
     NO_DEFAULT_PATH)
   find_library(GFLAGS_LIBRARY_RELEASE gflags HINTS ${FIND_LIB_PREFIX}/caffe3rdparty/lib)
   find_library(GFLAGS_LIBRARY_DEBUG gflagsd HINTS ${FIND_LIB_PREFIX}/caffe3rdparty/lib)
@@ -638,20 +626,19 @@ ${OpenCV_LIBS_DEBUG_DIR})
   list(APPEND CMAKE_PREFIX_PATH ${GRPC_INSTALL_DIR})
   list(APPEND CMAKE_PROGRAM_PATH ${GRPC_INSTALL_DIR}/bin)
   
-  ## ★ gRPC と Protobuf (gRPCコンポーネント付き) を探す ★
   #find_package(Protobuf CONFIG REQUIRED COMPONENTS gRPC)
   #find_package(gRPC CONFIG REQUIRED)
 
   #include_directories(${Protobuf_INCLUDE_DIRS})
 
   include_directories(${OpenCV_INCLUDE_DIRS})
-  link_directories(${OpenCV_LIB_DIR})
+  link_directories($ENV{OpenCV_LIBS_RELEASE_DIR})
+  link_directories($ENV{OpenCV_LIBS_DEBUG_DIR})
 
   # If OpenPose builds it
   if (BUILD_CAFFE)
     unset(Caffe_INCLUDE_DIRS CACHE)
-    unset(Caffe_LIB_RELEASE 
-CACHE)
+    unset(Caffe_LIB_RELEASE CACHE)
     unset(Caffe_Proto_LIB_RELEASE CACHE)
   endif (BUILD_CAFFE)
   # OpenCL
@@ -704,8 +691,7 @@ find_library(BOOST_FILESYSTEM_LIB_RELEASE boost_filesystem-vc142-mt-x64-1_74 HIN
   if (${GPU_MODE} MATCHES "OPENCL")
     unset(Caffe_INCLUDE_DIRS CACHE)
     set(Caffe_INCLUDE_DIRS "3rdparty/windows/caffe_opencl/include;3rdparty/windows/caffe_opencl/include2" CACHE FILEPATH "Caffe_INCLUDE_DIRS")
-  # CUDA and 
-CPU
+  # CUDA and CPU
   else (${GPU_MODE} MATCHES "OPENCL")
     # CPU
     if (${GPU_MODE} MATCHES "CPU_ONLY")
@@ -725,8 +711,7 @@ CPU
   endif (WITH_FLIR_CAMERA)
   set(Caffe_FOUND 1)
 
-  # 
-Build DLL Must be on if Build Python is on
+  # Build DLL Must be on if Build Python is on
   if (BUILD_PYTHON)
     if (NOT BUILD_BIN_FOLDER)
       message(FATAL_ERROR "BUILD_BIN_FOLDER must be turned on to as well to build python library")
@@ -808,8 +793,7 @@ NOTE: This process might take several minutes depending
         execute_process(COMMAND git checkout 1807aad WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/caffe)
       elseif (${GPU_MODE} MATCHES "CPU_ONLY")
         if (USE_MKL)
-          #execute_process(COMMAND git checkout intel 
-WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/caffe)
+          #execute_process(COMMAND git checkout intel WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/caffe)
           execute_process(COMMAND git checkout b6712ce WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/caffe)
           execute_process(COMMAND sh prepare_mkl.sh WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/caffe/external/mkl
               OUTPUT_VARIABLE rv)
@@ -987,11 +971,10 @@ if (WITH_CERES)
   include_directories(${CERES_INCLUDE_DIRS})
 endif (WITH_CERES)
 if (WITH_FLIR_CAMERA)
-  include_directories(SYSTEM ${SPINNAKER_INCLUDE_DIRS}) # To remove its warnings, equiv.
-to -isystem
+  include_directories(SYSTEM ${SPINNAKER_INCLUDE_DIRS}) # To remove its warnings, equiv.to -isystem
 endif (WITH_FLIR_CAMERA)
 if (WITH_3D_ADAM_MODEL)
-                                    include_directories(include/adam) # TODO: TEMPORARY - TO BE REMOVED IN THE FUTURE
+  include_directories(include/adam) # TODO: TEMPORARY - TO BE REMOVED IN THE FUTURE
   include_directories(${CERES_INCLUDE_DIRS})
   include_directories(${EIGEN3_INCLUDE_DIRS})
   set(OpenPose_3rdparty_libraries ${OpenPose_3rdparty_libraries} Eigen3::Eigen)
@@ -1013,7 +996,7 @@ if (UNIX OR APPLE)
 elseif (WIN32)
   
 set(OpenPose_3rdparty_libraries ${OpenPose_3rdparty_libraries}
-      debug ${OpenCV_LIBS_DEBUG} optimized ${OpenCV_LIBS_RELEASE}
+      debug opencv_world490d optimized opencv_world490
       debug ${GFLAGS_LIBRARY_DEBUG} optimized ${GFLAGS_LIBRARY_RELEASE}
       debug ${GLOG_LIBRARY_DEBUG} optimized ${GLOG_LIBRARY_RELEASE})
 endif (UNIX OR APPLE)
@@ -1057,8 +1040,7 @@ if (WITH_3D_RENDERER)
 endif (WITH_3D_RENDERER)
 if (WITH_CERES)
   set(OpenPose_3rdparty_libraries ${OpenPose_3rdparty_libraries} ${CERES_LIBRARIES})
-endif 
-(WITH_CERES)
+endif (WITH_CERES)
 if (WITH_FLIR_CAMERA)
   set(OpenPose_3rdparty_libraries ${OpenPose_3rdparty_libraries} ${SPINNAKER_LIB})
 endif (WITH_FLIR_CAMERA)

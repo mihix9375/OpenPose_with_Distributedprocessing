@@ -52,11 +52,12 @@ wget https://archives.boost.io/release/1.80.0/source/boost_1_80_0.7z
 echo:
 echo Installing ...
 %zpath% x boost_1_80_0.7z -mmt > %logDir%\boost.log 
-cd boost_1_80_0
+move boost_1_80_0 ..\3rdparty\boost_1.80.0
+cd ..\3rdparty\boost_1_80_0
 call .\bootstrap.bat >> %logDir%\boost.log
 call b2.exe address-model=64 >> %logDir%\boost.log
 cd ..
-move boost_1_80_0 ..\3rdparty\boost_1.80.0
+cd ..
 cd ..
 echo Done
 goto :input
@@ -130,17 +131,18 @@ echo Downloading ...
 wget https://github.com/opencv/opencv/archive/4.9.0.zip
 echo Installing ...
 %zpath% x 4.9.0.zip -mmt > %logDir%\opencv.log
-cd opencv-4.9.0
-mkdir build
-call ..\..\3rdparty\cmake-3.31.5\bin\cmake.exe -S . -B build -G "Visual Studio 16 2019" -DBUILD_opencv_world=ON >> %logDir%\opencv.log
-cd build
-call ..\..\..\3rdparty\cmake-3.31.5\bin\cmake.exe --build . --config Debug >> %logDir%\opencvd.log
-call ..\..\..\3rdparty\cmake-3.31.5\bin\cmake.exe --build . --config Release >> %logDir%\opencv.log
-cd ..
-cd ..
 move opencv-4.9.0 ..\3rdparty\opencv-4.9.0
+cd ..\3rdparty\opencv-4.9.0
+mkdir build
+call ..\cmake-3.31.5\bin\cmake.exe -S . -B build -G "Visual Studio 16 2019" -DBUILD_opencv_world=ON >> %logDir%\opencv.log
+cd build
+call ..\..\cmake-3.31.5\bin\cmake.exe --build . --config Debug >> %logDir%\opencvd.log
+call ..\..\cmake-3.31.5\bin\cmake.exe --build . --config Release >> %logDir%\opencv.log
+cd ..
+cd ..
 cd ..
 echo Done
+pause
 goto :input
 
 :8
@@ -157,13 +159,6 @@ cd temp
 wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip > %logDir%\eigen.log
 echo Installing ...
 %zpath% x eigen-3.4.0.zip -mmt >> %logDir%\eigen.log
-cd eigen-3.4.0
-mkdir build
-call ..\..\3rdparty\cmake-3.31.5\bin\cmake.exe -S . -B build -G "Visual Studio 16 2019"  >> %logDir%\eigen.log
-cd build
-call ..\..\..\3rdparty\cmake-3.31.5\bin\cmake.exe --build . >> %logDir%\eigen.log
-cd ..
-cd ..
 move eigen-3.4.0 ..\3rdparty\eigen-3.4.0
 cd ..
 echo Done

@@ -39,7 +39,7 @@ using OpenPoseStream::FrameResult;
  * @return 処理結果のJSON文字列
 **/
 
-std::string process_with_openpose(op::Wrapper& opWrapper, const std::string& image_data)
+void process_with_openpose(op::Wrapper& opWrapper, const std::string& image_data, bool& success, json& json_data)
 {
     std::vector<char> data(image_data.begin(), image_data.end());
     cv::Mat inputImage = cv::imdecode(data, cv::IMREAD_COLOR);
@@ -47,7 +47,7 @@ std::string process_with_openpose(op::Wrapper& opWrapper, const std::string& ima
     if (inputImage.empty())
     {
         std::cout << "process_with_openpose() : 画像のデコードに失敗しました" << '\n';
-        return {};
+        json_data = {};
     }
 
     auto datums = std::make_shared<std::vector<std::shared_ptr<op::Datum>>>();
@@ -121,7 +121,7 @@ std::string process_with_openpose(op::Wrapper& opWrapper, const std::string& ima
 
     result_json["people"] = peopleArray;
 
-    return result_json.dump();
+    json_data = result_json;
 }
 
 void match_keypoints(const op::Array<float>& points1_op, const op::Array<float>& points2_op, std::vector<cv::Point2f>& points1_cv, std::vector<cv::Point2f>& points2_cv)
@@ -331,6 +331,22 @@ class OpenPoseStreamServer final : public OpenPoseStreamer::Service
                                                                 req.image_left(),
                                                                 req.serial_right(),
                                                                 req.serial_left(),
+                                                                success,
+                                                                json_data);
+                                        result.set_success(success);
+                                        result.set_json_data(json_data.dump()); 
+                                        result.set_frame_id(req.frame_id());
+                                        result.set_error_message("");;
+
+                                        stream->Write(result);
+                                    }
+                                    else if (req.mode() == 1) // 1 camera
+                                    {
+                                        bool success = false;
+                                        json json_data;
+                                        process_with_openpose(*opWrapper_,
+                                                                req.image_right(),
+                                                                req.serial_right(),
                                                                 success,
                                                                 json_data);
                                         result.set_success(success);
