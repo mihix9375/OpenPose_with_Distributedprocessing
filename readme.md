@@ -19,7 +19,7 @@
 
 ### Client (Worker)
 - Download or clone https://github.com/mihix9375/OpenPose-1.7.0-Improved
-- Merge OpenPose-1.7.0-Improved and OpenPose_with_Distributedprocessing
+- Merge OpenPose_with_Distributedprocessing to OpenPose-1.7.0-Improved
 - Run "get_3rdparty.bat"
 - Run "get_models.bat"
 - Run "workerbuild.bat"
