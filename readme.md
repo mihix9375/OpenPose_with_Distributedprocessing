@@ -7,7 +7,7 @@
 
 ## Required
 - Windows 10/11
-- NVIDIA GPU
+- VRAM 16GB NVIDIA GPU
 - 32GB RAM
 - Clock 4GHz Core 8 Thread 16 CPU
 
