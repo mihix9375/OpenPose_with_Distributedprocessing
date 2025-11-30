@@ -315,50 +315,50 @@ class OpenPoseStreamServer final : public OpenPoseStreamer::Service
 
         Status ProcessStream(ServerContext* context,
                             ServerReaderWriter<FrameResult, FrameRequest>* stream)
-                            override
-                            {
-                                FrameRequest req;
+        override
+        {
+            FrameRequest req;
 
-                                while (stream->Read(&req))
-                                {
-                                    FrameResult result;
-                                    if (req.mode() == 0) // 2 camera
-                                    {
-                                        bool success = false;
-                                        json json_data;
-                                        process_with_triangulation(*opWrapper_,
-                                                                req.image_right(),
-                                                                req.image_left(),
-                                                                req.serial_right(),
-                                                                req.serial_left(),
-                                                                success,
-                                                                json_data);
-                                        result.set_success(success);
-                                        result.set_json_data(json_data.dump()); 
-                                        result.set_frame_id(req.frame_id());
-                                        result.set_error_message("");;
+            while (stream->Read(&req))
+            {
+                FrameResult result;
+                if (req.mode() == 0) // 2 camera
+                {
+                bool success = false;
+                json json_data;
+                process_with_triangulation(*opWrapper_,
+                                        req.image_right(),
+                                        req.image_left(),
+                                        req.serial_right(),
+                                        req.serial_left(),
+                                        success,
+                                        json_data);
+                result.set_success(success);
+                result.set_json_data(json_data.dump()); 
+                result.set_frame_id(req.frame_id());
+                result.set_error_message("");;
 
-                                        stream->Write(result);
-                                    }
-                                    else if (req.mode() == 1) // 1 camera
-                                    {
-                                        bool success = false;
-                                        json json_data;
-                                        process_with_openpose(*opWrapper_,
-                                                                req.image_right(),
-                                                                req.serial_right(),
-                                                                success,
-                                                                json_data);
-                                        result.set_success(success);
-                                        result.set_json_data(json_data.dump()); 
-                                        result.set_frame_id(req.frame_id());
-                                        result.set_error_message("");;
+                stream->Write(result);
+            }
+            else if (req.mode() == 1) // 1 camera
+            {
+                bool success = false;
+                json json_data;
+                process_with_openpose(*opWrapper_,
+                                        req.image_right(),
+                                        req.serial_right(),
+                                        success,
+                                        json_data);
+                result.set_success(success);
+                result.set_json_data(json_data.dump()); 
+                result.set_frame_id(req.frame_id());
+                result.set_error_message("");;
 
-                                        stream->Write(result);
-                                    }
-                                }
-                                return Status::OK;
-                            }
+                stream->Write(result);
+            }
+        }
+        return Status::OK;
+    }
 };
 
 int ProcessAndResponse(op::Wrapper& opWrapper, const std::string CurrentIP, const int CurrentPort)
